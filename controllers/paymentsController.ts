@@ -5,5 +5,5 @@ export async function postPayment(req: Request, res: Response) {
     const { cardId, businessId, amount, password } = req.body;
 
     await paymentsService.createPayment(cardId, password, businessId, amount);
-    res.sendStatus(200);
+    res.sendStatus(201);
 }
