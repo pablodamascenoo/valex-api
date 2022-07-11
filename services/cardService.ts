@@ -4,6 +4,7 @@ import { faker } from "@faker-js/faker";
 import dotenv from "dotenv";
 import Cryptr from "cryptr";
 import dayjs from "dayjs";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
@@ -19,7 +20,46 @@ export async function createCard(
     return { cardObj, cvcNumber: cardData.cvcNumber };
 }
 
-//#TODO: finish generateCardData
+export async function activateCard(
+    cardId: number,
+    securityCode: string,
+    password: string
+) {
+    const cardFound = await existsCard(cardId);
+    isExpired(cardFound.expirationDate);
+    verifyCvc(cardFound.securityCode, securityCode);
+    if (!cardFound.isBlocked)
+        throw { status: 409, message: "card already active" };
+    const SALT = bcrypt.genSaltSync(15);
+    const cryptedPassword = bcrypt.hashSync(password, SALT);
+    const data: cardRepository.CardUpdateData = {
+        isBlocked: false,
+        password: cryptedPassword,
+    };
+    await cardRepository.update(cardId, data);
+}
+
+async function existsCard(cardId: number) {
+    const cardFound = await cardRepository.findById(cardId);
+
+    if (!cardFound) throw { status: 404, message: "card not found" };
+
+    return cardFound;
+}
+
+function isExpired(expirationDate: string) {
+    if (dayjs(expirationDate).isBefore(dayjs(Date.now()).format("MM/YY"))) {
+        throw { status: 401, message: "card expired" };
+    }
+}
+
+function verifyCvc(EncriptedCvc: string, securityCode: string) {
+    const decryptedCvc = cryptr.decrypt(EncriptedCvc);
+    if (decryptedCvc !== securityCode) {
+        throw { status: 401, message: "security code do not match" };
+    }
+}
+
 function generateCardData(
     employeeId: number,
     type: cardRepository.TransactionTypes,
@@ -57,8 +97,6 @@ async function cardTypeAlreadyExists(
         type,
         employeeId
     );
-
-    console.log(cardFound);
 
     if (cardFound)
         throw {
@@ -100,5 +138,5 @@ function generateAndEncryptCVC() {
 }
 
 function generateExpirationDate() {
-    return dayjs().add(5, "year").format("MM/YYYY");
+    return dayjs().add(5, "year").format("MM/YY");
 }

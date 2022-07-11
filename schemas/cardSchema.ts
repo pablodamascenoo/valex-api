@@ -6,3 +6,13 @@ export const createCardSchema = Joi.object({
         .valid("groceries", "restaurant", "transport", "education", "health")
         .required(),
 });
+
+export const activateCardSchema = Joi.object({
+    cardId: Joi.number().integer().required(),
+    securityCode: Joi.string()
+        .pattern(/[0-9]{3}/)
+        .required(),
+    password: Joi.string()
+        .pattern(/[0-9]{4}/)
+        .required(),
+});
