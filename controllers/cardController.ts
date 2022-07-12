@@ -3,6 +3,8 @@ import {
     createCard,
     activateCard,
     balanceAndTransactions,
+    lockCard,
+    unlockCard,
 } from "../services/cardService.js";
 
 export async function postCard(req: Request, res: Response) {
@@ -25,4 +27,16 @@ export async function getBalance(req: Request, res: Response) {
 
     const data = await balanceAndTransactions(+cardId);
     res.send(data);
+}
+
+export async function putUnlockCard(req: Request, res: Response) {
+    const { cardId, password } = req.body;
+    await unlockCard(cardId, password);
+    res.sendStatus(200);
+}
+
+export async function putLockCard(req: Request, res: Response) {
+    const { cardId, password } = req.body;
+    await lockCard(cardId, password);
+    res.sendStatus(200);
 }

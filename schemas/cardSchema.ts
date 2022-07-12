@@ -16,3 +16,10 @@ export const activateCardSchema = Joi.object({
         .pattern(/[0-9]{4}/)
         .required(),
 });
+
+export const lockUnlockCardSchema = Joi.object({
+    cardId: Joi.number().integer().required(),
+    password: Joi.string()
+        .pattern(/[0-9]{4}/)
+        .required(),
+});

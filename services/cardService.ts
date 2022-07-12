@@ -7,6 +7,7 @@ import {
     isExpired,
     verifyCvc,
     showBalance,
+    verifyPassword,
 } from "../utils/cardUtils.js";
 import { existsEmployee } from "../utils/employeeUtils.js";
 import * as paymentRepository from "../repositories/paymentRepository.js";
@@ -51,4 +52,22 @@ export async function balanceAndTransactions(cardId: number) {
         recharges: await rechargeRepository.findByCardId(cardId),
     };
     return data;
+}
+
+export async function lockCard(cardId: number, password: string) {
+    const cardFound = await existsCard(cardId);
+    isExpired(cardFound.expirationDate);
+    if (cardFound.isBlocked)
+        throw { status: 409, message: "card is already blocked" };
+    verifyPassword(password, cardFound.password);
+    cardRepository.update(cardId, { isBlocked: true });
+}
+
+export async function unlockCard(cardId: number, password: string) {
+    const cardFound = await existsCard(cardId);
+    isExpired(cardFound.expirationDate);
+    if (!cardFound.isBlocked)
+        throw { status: 409, message: "card isn't blocked" };
+    verifyPassword(password, cardFound.password);
+    cardRepository.update(cardId, { isBlocked: false });
 }
