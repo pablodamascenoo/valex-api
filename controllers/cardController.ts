@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { createCard, activateCard } from "../services/cardService.js";
+import {
+    createCard,
+    activateCard,
+    balanceAndTransactions,
+} from "../services/cardService.js";
 
 export async function postCard(req: Request, res: Response) {
     const { employeeId, type } = req.body;
@@ -14,4 +18,11 @@ export async function updateCard(req: Request, res: Response) {
 
     await activateCard(cardId, securityCode, password);
     res.sendStatus(200);
+}
+
+export async function getBalance(req: Request, res: Response) {
+    const { cardId } = req.params;
+
+    const data = await balanceAndTransactions(+cardId);
+    res.send(data);
 }

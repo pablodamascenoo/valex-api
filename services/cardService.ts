@@ -6,8 +6,11 @@ import {
     generateCardData,
     isExpired,
     verifyCvc,
+    showBalance,
 } from "../utils/cardUtils.js";
 import { existsEmployee } from "../utils/employeeUtils.js";
+import * as paymentRepository from "../repositories/paymentRepository.js";
+import * as rechargeRepository from "../repositories/rechargeRepository.js";
 
 export async function createCard(
     employeeId: number,
@@ -36,4 +39,16 @@ export async function activateCard(
         password: cryptedPassword,
     };
     await cardRepository.update(cardId, data);
+}
+
+export async function balanceAndTransactions(cardId: number) {
+    if (isNaN(cardId)) throw { status: 422, message: "id must be a number" };
+    await existsCard(cardId);
+    const balance = await showBalance(cardId);
+    const data = {
+        balance,
+        transactions: await paymentRepository.findByCardId(cardId),
+        recharges: await rechargeRepository.findByCardId(cardId),
+    };
+    return data;
 }

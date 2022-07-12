@@ -1,5 +1,7 @@
 import * as cardRepository from "../repositories/cardRepository.js";
 import * as employeeRepository from "../repositories/employeeRepository.js";
+import * as paymentRepository from "../repositories/paymentRepository.js";
+import * as rechargeRepository from "../repositories/rechargeRepository.js";
 import { faker } from "@faker-js/faker";
 import dotenv from "dotenv";
 import Cryptr from "cryptr";
@@ -92,4 +94,13 @@ function generateAndEncryptCVC() {
 
 function generateExpirationDate() {
     return dayjs().add(5, "year").format("MM/YY");
+}
+
+export async function showBalance(cardId: number) {
+    const payments = await paymentRepository.findByCardId(cardId);
+    const recharges = await rechargeRepository.findByCardId(cardId);
+    let balance = 0;
+    recharges.forEach((recharge) => (balance += +recharge.amount));
+    payments.forEach((payment) => (balance += -payment.amount));
+    return balance;
 }

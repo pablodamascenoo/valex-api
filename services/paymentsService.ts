@@ -1,4 +1,9 @@
-import { isExpired, existsCard, verifyPassword } from "../utils/cardUtils.js";
+import {
+    isExpired,
+    existsCard,
+    verifyPassword,
+    showBalance,
+} from "../utils/cardUtils.js";
 import * as businessRepository from "../repositories/businessRepository.js";
 import * as paymentRepository from "../repositories/paymentRepository.js";
 import * as rechargeRepository from "../repositories/rechargeRepository.js";
@@ -35,11 +40,7 @@ async function verifyBusiness(businessId: number, type: TransactionTypes) {
 }
 
 async function verifyAmount(cardId: number, amount: number) {
-    const payments = await paymentRepository.findByCardId(cardId);
-    const recharges = await rechargeRepository.findByCardId(cardId);
-    let balance = 0;
-    recharges.forEach((recharge) => (balance += +recharge.amount));
-    payments.forEach((payment) => (balance += -payment.amount));
+    const balance = await showBalance(cardId);
 
     if (+amount > balance)
         throw { status: 401, message: "not enough balance in the card" };
