@@ -10,9 +10,7 @@ configDatabase = {
 };
 
 if (process.env.MODE === "PROD") {
-    configDatabase = {
-        ssl: { rejectUnauthorized: false },
-    };
+    configDatabase.ssl = { rejectUnauthorized: false };
 }
 
 export const connection = new Pool(configDatabase);
