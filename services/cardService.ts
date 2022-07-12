@@ -32,7 +32,7 @@ export async function activateCard(
     const cardFound = await existsCard(cardId);
     isExpired(cardFound.expirationDate);
     verifyCvc(cardFound.securityCode, securityCode);
-    if (cardFound.password.length)
+    if (cardFound.password)
         throw { status: 409, message: "card already active" };
     const SALT = bcrypt.genSaltSync(15);
     const cryptedPassword = bcrypt.hashSync(password, SALT);
