@@ -50,7 +50,7 @@ API:
         "password": "1234"
     }
 
-- PUT /cards/lock
+- PUT /cards/unlock
     - Rota para desbloquear um cartão
     - headers: {}
     - body: {
